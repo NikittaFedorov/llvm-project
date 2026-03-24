@@ -1,4 +1,10 @@
 include "llvm/Target/Target.td"
-include "YASarchRegisterInfo.td"
 
-def YASarch : Target;
+include "YASarchRegisterInfo.td"
+include "YASarchInstrInfo.td"
+
+def YASarchInstrInfo : InstrInfo;
+
+def YASarch : Target {
+    let InstructionSet = YASarchInstrInfo;
+}

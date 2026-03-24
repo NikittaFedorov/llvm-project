@@ -5,3 +5,7 @@
 //
 #define GET_REGINFO_ENUM
 #include "YASarchGenRegisterInfo.inc"
+
+// Defines symbolic names for the YASarch instructions.
+#define GET_INSTRINFO_ENUM
+#include "YASarchGenInstrInfo.inc"
