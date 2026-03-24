@@ -1,11 +1,12 @@
 add_llvm_component_library(LLVMYASarchDesc
-  YASarchMCTargetDesc.cpp
+    YASarchMCTargetDesc.cpp
+    YASarchMCAsmInfo.cpp
 
-  LINK_COMPONENTS
-  MC
-  Support
-  YASarchInfo
+    LINK_COMPONENTS
+    MC
+    Support
+    YASarchInfo
 
-  ADD_TO_COMPONENT
-  YASarch
- )
+    ADD_TO_COMPONENT
+    YASarch
+)

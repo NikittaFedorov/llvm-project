@@ -2,9 +2,13 @@
 #include "llvm/MC/TargetRegistry.h"
 #include "llvm/MC/MCSubtargetInfo.h"
 #include "llvm/MC/MCInstrInfo.h"
+#include "llvm/MC/MCDwarf.h"
+
+#include "llvm/Support/ErrorHandling.h"
 
 #include "TargetInfo/YASarchTargetInfo.h"
 #include "MCTargetDesc/YASarchInfo.h"
+#include "YASarchMCAsmInfo.h"
 
 #include "YASarch.h"
 
@@ -41,11 +45,22 @@ static MCSubtargetInfo *createYASarchMCSubtargetInfo(const Triple &TT,
   return createYASarchMCSubtargetInfoImpl(TT, CPU, /*TuneCPU*/ CPU, FS);
 }
 
+static MCAsmInfo *createYASarchMCAsmInfo(const MCRegisterInfo &MRI,
+                                     const Triple &TT,
+                                     const MCTargetOptions &Options) {
+  YASarch_DUMP_MAGENTA
+  MCAsmInfo *MAI = new YASarchELFMCAsmInfo(TT);
+  unsigned SP = MRI.getDwarfRegNum(YASarch::R1, true);
+  MCCFIInstruction Inst = MCCFIInstruction::cfiDefCfa(nullptr, SP, 0);
+  MAI->addInitialFrameState(Inst);
+  return MAI;
+}
 
 // We need to define this function
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeYASarchTargetMC() {
     YASarch_DUMP_MAGENTA
     Target &TheYASarchTarget = getTheYASarchTarget();
+    RegisterMCAsmInfoFn X(TheYASarchTarget, createYASarchMCAsmInfo);
     // Register the MC register info.
     TargetRegistry::RegisterMCRegInfo(TheYASarchTarget, createYASarchMCRegisterInfo);
     // Register the MC instruction info.
