@@ -2,6 +2,7 @@
 
 #include "YASarch.h"
 #include "YASarchISelLowering.h"
+#include "YASarchFrameLowering.h"
 
 #include "llvm/CodeGen/TargetSubtargetInfo.h"
 
@@ -12,6 +13,8 @@ namespace llvm {
 
 class YASarchSubtarget : public YASarchGenSubtargetInfo {
   YASarchTargetLowering TLInfo;
+  YASarchFrameLowering FrameLowering;
+
 public:
   YASarchSubtarget(const Triple &TT, const std::string &CPU, const std::string &FS,
                const TargetMachine &TM);
@@ -23,6 +26,11 @@ public:
   const YASarchTargetLowering *getTargetLowering() const override {
     YASarch_DUMP_CYAN
     return &TLInfo;
+  }
+
+  const YASarchFrameLowering *getFrameLowering() const override {
+    YASarch_DUMP_CYAN
+    return &FrameLowering;
   }
 };
 
