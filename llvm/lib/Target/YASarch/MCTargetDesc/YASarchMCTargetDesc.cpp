@@ -1,5 +1,6 @@
 #include "llvm/MC/MCRegisterInfo.h"
 #include "llvm/MC/TargetRegistry.h"
+#include "llvm/MC/MCSubtargetInfo.h"
 #include "llvm/MC/MCInstrInfo.h"
 
 #include "TargetInfo/YASarchTargetInfo.h"
@@ -14,6 +15,9 @@ using namespace llvm;
 
 #define GET_INSTRINFO_MC_DESC
 #include "YASarchGenInstrInfo.inc"
+
+#define GET_SUBTARGETINFO_MC_DESC
+#include "YASarchGenSubtargetInfo.inc"
 
 static MCRegisterInfo *createYASarchMCRegisterInfo(const Triple &TT) {
   YASarch_DUMP_MAGENTA
@@ -31,6 +35,13 @@ static MCInstrInfo *createYASarchMCInstrInfo() {
   return X;
 }
 
+static MCSubtargetInfo *createYASarchMCSubtargetInfo(const Triple &TT,
+                                                 StringRef CPU, StringRef FS) {
+  YASarch_DUMP_MAGENTA
+  return createYASarchMCSubtargetInfoImpl(TT, CPU, /*TuneCPU*/ CPU, FS);
+}
+
+
 // We need to define this function
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeYASarchTargetMC() {
     YASarch_DUMP_MAGENTA
@@ -39,4 +50,7 @@ extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeYASarchTargetMC() {
     TargetRegistry::RegisterMCRegInfo(TheYASarchTarget, createYASarchMCRegisterInfo);
     // Register the MC instruction info.
     TargetRegistry::RegisterMCInstrInfo(TheYASarchTarget, createYASarchMCInstrInfo);
+    // Register the MC subtarget info.
+    TargetRegistry::RegisterMCSubtargetInfo(TheYASarchTarget,
+                                          createYASarchMCSubtargetInfo);
 }
