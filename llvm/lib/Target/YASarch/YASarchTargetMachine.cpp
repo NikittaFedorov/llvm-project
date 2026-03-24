@@ -1,4 +1,6 @@
 #include "llvm/MC/TargetRegistry.h"
+#include "llvm/CodeGen/TargetPassConfig.h"
+
 #include <optional>
 
 #include "YASarchTargetMachine.h"
@@ -25,4 +27,25 @@ YASarchTargetMachine::YASarchTargetMachine(const Target &T, const Triple &TT,
           Reloc::Static, getEffectiveCodeModel(CM, CodeModel::Small), OL) {
   YASarch_DUMP_CYAN
   initAsmInfo();
+}
+
+namespace {
+
+/// YASarch Code Generator Pass Configuration Options.
+class YASarchPassConfig : public TargetPassConfig {
+public:
+  YASarchPassConfig(YASarchTargetMachine &TM, PassManagerBase &PM)
+      : TargetPassConfig(TM, PM) {}
+
+  bool addInstSelector() override {
+    YASarch_DUMP_CYAN
+    return false;
+  }
+};
+
+} // end anonymous namespace
+
+TargetPassConfig *YASarchTargetMachine::createPassConfig(PassManagerBase &PM) {
+  YASarch_DUMP_CYAN
+  return new YASarchPassConfig(*this, PM);
 }
