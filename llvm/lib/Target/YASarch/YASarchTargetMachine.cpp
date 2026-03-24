@@ -1,8 +1,10 @@
-#include "YASarchTargetMachine.h"
-#include "YASarch.h"
-#include "TargetInfo/YASarchTargetInfo.h"
 #include "llvm/MC/TargetRegistry.h"
 #include <optional>
+
+#include "YASarchTargetMachine.h"
+#include "TargetInfo/YASarchTargetInfo.h"
+
+#include "YASarch.h"
 
 using namespace llvm;
 
@@ -22,4 +24,5 @@ YASarchTargetMachine::YASarchTargetMachine(const Target &T, const Triple &TT,
           T, "e-m:e-p:32:32-i8:8:32-i16:16:32-i64:64-n32", TT, CPU, FS, Options,
           Reloc::Static, getEffectiveCodeModel(CM, CodeModel::Small), OL) {
   YASarch_DUMP_CYAN
+  initAsmInfo();
 }
