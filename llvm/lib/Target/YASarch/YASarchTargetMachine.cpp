@@ -37,8 +37,13 @@ public:
   YASarchPassConfig(YASarchTargetMachine &TM, PassManagerBase &PM)
       : TargetPassConfig(TM, PM) {}
 
+  YASarchTargetMachine &getYASarchTargetMachine() const {
+    return getTM<YASarchTargetMachine>();
+  }
+
   bool addInstSelector() override {
     YASarch_DUMP_CYAN
+    addPass(createYASarchISelDag(getYASarchTargetMachine(), getOptLevel()));
     return false;
   }
 };

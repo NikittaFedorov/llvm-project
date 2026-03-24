@@ -2,6 +2,8 @@
 
 #include "llvm/Support/raw_ostream.h"
 
+#include "llvm/Target/TargetMachine.h"
+
 #include "MCTargetDesc/YASarchMCTargetDesc.h"
 
 #define YASarch_DUMP(Color)                                                        \
@@ -18,3 +20,11 @@
 #define YASarch_DUMP_CYAN    YASarch_DUMP(llvm::raw_ostream::CYAN)
 #define YASarch_DUMP_MAGENTA YASarch_DUMP(llvm::raw_ostream::MAGENTA)
 #define YASarch_DUMP_WHITE   YASarch_DUMP(llvm::raw_ostream::WHITE)
+
+namespace llvm {
+class YASarchTargetMachine;
+class FunctionPass;
+
+FunctionPass *createYASarchISelDag(YASarchTargetMachine &TM, CodeGenOptLevel OptLevel);
+
+} // namespace llvm
