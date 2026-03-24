@@ -11,6 +11,7 @@
 #include "YASarchMCAsmInfo.h"
 
 #include "YASarch.h"
+#include "YASarchInstrPrinter.h"
 
 using namespace llvm;
 
@@ -56,6 +57,16 @@ static MCAsmInfo *createYASarchMCAsmInfo(const MCRegisterInfo &MRI,
   return MAI;
 }
 
+static MCInstPrinter *createYASarchMCInstPrinter(const Triple &T,
+                                             unsigned SyntaxVariant,
+                                             const MCAsmInfo &MAI,
+                                             const MCInstrInfo &MII,
+                                             const MCRegisterInfo &MRI) {
+  YASarch_DUMP_MAGENTA
+  return new YASarchInstPrinter(MAI, MII, MRI);
+}
+
+
 // We need to define this function
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeYASarchTargetMC() {
     YASarch_DUMP_MAGENTA
@@ -68,4 +79,8 @@ extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeYASarchTargetMC() {
     // Register the MC subtarget info.
     TargetRegistry::RegisterMCSubtargetInfo(TheYASarchTarget,
                                           createYASarchMCSubtargetInfo);
+    
+
+    // Register the MCInstPrinter
+    TargetRegistry::RegisterMCInstPrinter(TheYASarchTarget, createYASarchMCInstPrinter);
 }
