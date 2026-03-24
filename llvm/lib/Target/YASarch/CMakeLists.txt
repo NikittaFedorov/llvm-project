@@ -9,6 +9,7 @@ tablegen(LLVM YASarchGenSubtargetInfo.inc -gen-subtarget)
 tablegen(LLVM YASarchGenMCPseudoLowering.inc -gen-pseudo-lowering)
 tablegen(LLVM YASarchGenDAGISel.inc -gen-dag-isel)
 tablegen(LLVM YASarchGenCallingConv.inc -gen-callingconv)
+tablegen(LLVM YASarchGenAsmWriter.inc -gen-asm-writer)
 
 add_public_tablegen_target(YASarchCommonTableGen)
 
