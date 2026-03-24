@@ -2,6 +2,7 @@ include "llvm/Target/Target.td"
 
 include "YASarchRegisterInfo.td"
 include "YASarchInstrInfo.td"
+include "YASarchCallingConv.td"
 
 class Proc<string Name, list<SubtargetFeature> Features>
  : Processor<Name, NoItineraries, Features>;
