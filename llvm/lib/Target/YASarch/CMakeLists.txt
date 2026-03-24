@@ -21,6 +21,7 @@ add_llvm_target(YASarchCodeGen
     YASarchAsmPrinter.cpp
     YASarchISelDagToDag.cpp
     YASarchISelLowering.cpp
+    YASarchMCInstrLower.cpp
     
     LINK_COMPONENTS
     CodeGen

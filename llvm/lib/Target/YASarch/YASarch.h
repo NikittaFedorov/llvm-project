@@ -24,6 +24,19 @@
 namespace llvm {
 class YASarchTargetMachine;
 class FunctionPass;
+class YASarchSubtarget;
+class AsmPrinter;
+class InstructionSelector;
+class MCInst;
+class MCOperand;
+class MachineInstr;
+class MachineOperand;
+class PassRegistry;
+
+bool lowerYASarchMachineInstrToMCInst(const MachineInstr *MI, MCInst &OutMI,
+                                  AsmPrinter &AP);
+bool LowerYASarchMachineOperandToMCOperand(const MachineOperand &MO,
+                                       MCOperand &MCOp, const AsmPrinter &AP);
 
 FunctionPass *createYASarchISelDag(YASarchTargetMachine &TM, CodeGenOptLevel OptLevel);
 
