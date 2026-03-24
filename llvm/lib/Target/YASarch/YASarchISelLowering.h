@@ -21,4 +21,18 @@ enum NodeType : unsigned {
 
 } // namespace YASarchISD
 
+class YASarchTargetLowering : public TargetLowering {
+public:
+  explicit YASarchTargetLowering(const TargetMachine &TM, const YASarchSubtarget &STI);
+
+  /// This method returns the name of a target specific DAG node.
+  const char *getTargetNodeName(unsigned Opcode) const override;
+
+  YASarchSubtarget const &getSubtarget() const { return STI; }
+
+private:
+  const YASarchSubtarget &STI;
+};
+
+
 } // end namespace llvm
