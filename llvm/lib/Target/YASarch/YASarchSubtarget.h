@@ -4,8 +4,10 @@
 #include "YASarchISelLowering.h"
 #include "YASarchFrameLowering.h"
 #include "YASarchRegisterInfo.h"
+#include "YASarchInstrInfo.h"
 
 #include "llvm/CodeGen/TargetSubtargetInfo.h"
+#include "llvm/CodeGen/SelectionDAGTargetInfo.h"
 
 #define GET_SUBTARGETINFO_HEADER
 #include "YASarchGenSubtargetInfo.inc"
@@ -16,6 +18,8 @@ class YASarchSubtarget : public YASarchGenSubtargetInfo {
   YASarchTargetLowering TLInfo;
   YASarchFrameLowering FrameLowering;
   YASarchRegisterInfo RegInfo;
+  YASarchInstrInfo InstrInfo;
+  SelectionDAGTargetInfo TSInfo;
 
 public:
   YASarchSubtarget(const Triple &TT, const std::string &CPU, const std::string &FS,
@@ -38,6 +42,13 @@ public:
   const YASarchRegisterInfo *getRegisterInfo() const override {
     YASarch_DUMP_CYAN
     return &RegInfo;
+  }
+  
+  const YASarchInstrInfo *getInstrInfo() const override { return &InstrInfo; }
+  
+  const SelectionDAGTargetInfo *getSelectionDAGInfo() const override {
+    YASarch_DUMP_CYAN
+    return &TSInfo;
   }
 };
 

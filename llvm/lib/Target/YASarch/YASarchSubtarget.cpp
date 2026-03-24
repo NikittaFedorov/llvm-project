@@ -14,6 +14,6 @@ using namespace llvm;
 YASarchSubtarget::YASarchSubtarget(const Triple &TT, const std::string &CPU,
                            const std::string &FS, const TargetMachine &TM)
     : YASarchGenSubtargetInfo(TT, CPU, /*TuneCPU=*/CPU, FS), TLInfo(TM, *this),
-      FrameLowering(*this) {
+      FrameLowering(*this), InstrInfo() {
   YASarch_DUMP_CYAN
 }
