@@ -85,4 +85,6 @@ extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeYASarchTargetMC() {
     TargetRegistry::RegisterMCInstPrinter(TheYASarchTarget, createYASarchMCInstPrinter);
     // Register the MC Code Emitter.
     TargetRegistry::RegisterMCCodeEmitter(TheYASarchTarget, createYASarchMCCodeEmitter);
+    // Register the asm backend.
+    TargetRegistry::RegisterMCAsmBackend(TheYASarchTarget, createYASarchAsmBackend);
 }

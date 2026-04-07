@@ -3,6 +3,7 @@ add_llvm_component_library(LLVMYASarchDesc
     YASarchMCAsmInfo.cpp
     YASarchInstrPrinter.cpp
     YASarchMCCodeEmitter.cpp
+    YASarchAsmBackend.cpp
 
     LINK_COMPONENTS
     MC
