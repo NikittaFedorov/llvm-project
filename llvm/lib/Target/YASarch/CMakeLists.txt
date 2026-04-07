@@ -10,6 +10,7 @@ tablegen(LLVM YASarchGenMCPseudoLowering.inc -gen-pseudo-lowering)
 tablegen(LLVM YASarchGenDAGISel.inc -gen-dag-isel)
 tablegen(LLVM YASarchGenCallingConv.inc -gen-callingconv)
 tablegen(LLVM YASarchGenAsmWriter.inc -gen-asm-writer)
+tablegen(LLVM YASarchGenMCCodeEmitter.inc -gen-emitter)
 
 add_public_tablegen_target(YASarchCommonTableGen)
 
