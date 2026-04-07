@@ -6,13 +6,13 @@
 
 #include "MCTargetDesc/YASarchMCTargetDesc.h"
 
-#define YASarch_DUMP(Color)                                                        \
+/*#define YASarch_DUMP(Color)                                                  \
   {                                                                            \
     llvm::errs().changeColor(Color)                                            \
         << __func__ << "\n\t\t" << __FILE__ << ":" << __LINE__ << "\n";        \
     llvm::errs().changeColor(llvm::raw_ostream::WHITE);                        \
-  }
-// #define YASarch_DUMP(Color) {}
+  }*/
+#define YASarch_DUMP(Color) {}
 
 #define YASarch_DUMP_RED     YASarch_DUMP(llvm::raw_ostream::RED)
 #define YASarch_DUMP_GREEN   YASarch_DUMP(llvm::raw_ostream::GREEN)
