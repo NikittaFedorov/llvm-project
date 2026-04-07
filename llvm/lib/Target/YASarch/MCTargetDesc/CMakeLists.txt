@@ -4,6 +4,7 @@ add_llvm_component_library(LLVMYASarchDesc
     YASarchInstrPrinter.cpp
     YASarchMCCodeEmitter.cpp
     YASarchAsmBackend.cpp
+    YASarchELFObjectWriter.cpp
 
     LINK_COMPONENTS
     MC
