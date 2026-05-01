@@ -1,0 +1,4 @@
+BUILTIN(YASarchPutPixel, "vUiUiUi", "nc")
+BUILTIN(YASarchFlush, "v", "nc")
+
+#undef BUILTIN
