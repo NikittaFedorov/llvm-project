@@ -25,6 +25,7 @@ BitVector YASarchRegisterInfo::getReservedRegs(const MachineFunction &MF) const 
 
   BitVector Reserved(getNumRegs());
   Reserved.set(YASarch::R1);
+  Reserved.set(YASarch::R15);
 
   if (TFI->hasFP(MF)) {
     Reserved.set(YASarch::R2);

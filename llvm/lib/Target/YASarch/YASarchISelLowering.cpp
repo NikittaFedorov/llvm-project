@@ -50,8 +50,16 @@ YASarchTargetLowering::YASarchTargetLowering(const TargetMachine &TM,
     setOperationAction(Opc, MVT::i32, Expand);
 
   setOperationAction(ISD::ADD, MVT::i32, Legal);
+  setOperationAction(ISD::SUB, MVT::i32, Legal);
   setOperationAction(ISD::MUL, MVT::i32, Legal);
-  // ...
+  setOperationAction(ISD::SDIV, MVT::i32, Legal);
+  setOperationAction(ISD::SREM, MVT::i32, Legal);
+  setOperationAction(ISD::OR, MVT::i32, Legal);
+  setOperationAction(ISD::AND, MVT::i32, Legal);
+  setOperationAction(ISD::XOR, MVT::i32, Legal);
+  setOperationAction(ISD::SRA, MVT::i32, Legal);
+  setOperationAction(ISD::SRL, MVT::i32, Legal);
+  setOperationAction(ISD::SHL, MVT::i32, Legal);
   setOperationAction(ISD::LOAD, MVT::i32, Legal);
   setOperationAction(ISD::STORE, MVT::i32, Legal);
 
@@ -72,10 +80,22 @@ const char *YASarchTargetLowering::getTargetNodeName(unsigned Opcode) const {
     return "YASarchISD::RET";
   case YASarchISD::BR_CC:
     return "YASarchISD::BR_CC";
+  case YASarchISD::CMPRR:
+    return "YASarchISD::CMPRR";
+  case YASarchISD::CMPRI:
+    return "YASarchISD::CMPRI";
   case YASarchISD::INC_EQi:
     return "YASarchISD::INC_EQi";
   case YASarchISD::INC_NEi:
     return "YASarchISD::INC_NEi";
+  case YASarchISD::INC_LEi:
+    return "YASarchISD::INC_LEi";
+  case YASarchISD::INC_LTi:
+    return "YASarchISD::INC_LTi";
+  case YASarchISD::INC_GEi:
+    return "YASarchISD::INC_GEi";
+  case YASarchISD::INC_GTi:
+    return "YASarchISD::INC_GTi";
   }
   return nullptr;
 }
@@ -622,29 +642,91 @@ unsigned YASarchTargetLowering::getIsdOpIncCmp(ISD::CondCode CCVal) const {
     return YASarchISD::INC_EQi;
   case ISD::CondCode::SETNE:
     return YASarchISD::INC_NEi;
+  case ISD::CondCode::SETLE:
+  case ISD::CondCode::SETULE:
+    return YASarchISD::INC_LEi;
+  case ISD::CondCode::SETLT:
+  case ISD::CondCode::SETULT:
+    return YASarchISD::INC_LTi;
+  case ISD::CondCode::SETGE:
+  case ISD::CondCode::SETUGE:
+    return YASarchISD::INC_GEi;
+  case ISD::CondCode::SETGT:
+  case ISD::CondCode::SETUGT:
+    return YASarchISD::INC_GTi;
+  }
+}
+
+ISD::CondCode
+YASarchTargetLowering::normalizeCondCode(ISD::CondCode CCVal) const {
+  switch (CCVal) {
+  default:
+    return CCVal;
+  case ISD::CondCode::SETULT:
+    return ISD::CondCode::SETLT;
+  case ISD::CondCode::SETULE:
+    return ISD::CondCode::SETLE;
+  case ISD::CondCode::SETUGT:
+    return ISD::CondCode::SETGT;
+  case ISD::CondCode::SETUGE:
+    return ISD::CondCode::SETGE;
   }
 }
 
 SDValue YASarchTargetLowering::lowerBR_CC(SDValue Op, SelectionDAG &DAG) const {
   SDValue CC = Op.getOperand(1);
-  SDValue ADD = Op.getOperand(2);
-  ISD::CondCode CCVal = cast<CondCodeSDNode>(CC)->get();
-  if (ADD->getOpcode() == ISD::ADD) {
-    SDValue INC = ADD->getOperand(1);
+  SDValue LHS = Op.getOperand(2);
+  SDValue RHS = Op.getOperand(3);
+  ISD::CondCode CCVal = normalizeCondCode(cast<CondCodeSDNode>(CC)->get());
+  SDLoc DL(Op);
+  if (LHS->getOpcode() == ISD::ADD) {
+    SDValue INC = LHS->getOperand(1);
     if (INC->getOpcode() == ISD::Constant &&
         cast<ConstantSDNode>(INC)->getZExtValue() == 1) {
-      SDValue CMP = Op.getOperand(3);
-      SDValue INCCMP = DAG.getNode(getIsdOpIncCmp(CCVal), ADD,
+      SDValue INCCMP = DAG.getNode(getIsdOpIncCmp(CCVal), LHS,
                                    DAG.getVTList({MVT::i32, MVT::i32}),
-                                   ADD->getOperand(0), CMP);
-      DAG.ReplaceAllUsesWith(ADD, INCCMP.getValue(1));
-      DAG.RemoveDeadNode(ADD.getNode());
+                                   LHS->getOperand(0), RHS);
+      DAG.ReplaceAllUsesWith(LHS, INCCMP.getValue(1));
+      DAG.RemoveDeadNode(LHS.getNode());
       SDValue Block = Op->getOperand(4);
       return DAG.getNode(YASarchISD::BR_CC, Op, Op.getValueType(),
                          Op.getOperand(0), INCCMP.getValue(0), Block);
     }
   }
-  return Op;
+
+  if (auto *CN = dyn_cast<ConstantSDNode>(RHS)) {
+    if (isInt<16>(CN->getSExtValue())) {
+      SDValue Block = Op.getOperand(4);
+      SDValue Compare = DAG.getNode(YASarchISD::CMPRI, DL, MVT::i32, LHS,
+                                    DAG.getConstant(CN->getSExtValue(), DL,
+                                                    MVT::i32),
+                                    DAG.getConstant(static_cast<unsigned>(CCVal),
+                                                    DL, MVT::i32));
+      return DAG.getNode(YASarchISD::BR_CC, DL, Op.getValueType(),
+                         Op.getOperand(0), Compare, Block);
+    }
+  }
+
+  if (auto *CN = dyn_cast<ConstantSDNode>(LHS)) {
+    if (isInt<16>(CN->getSExtValue())) {
+      CCVal = normalizeCondCode(ISD::getSetCCSwappedOperands(CCVal));
+      SDValue Block = Op.getOperand(4);
+      SDValue Compare = DAG.getNode(YASarchISD::CMPRI, DL, MVT::i32, RHS,
+                                    DAG.getConstant(CN->getSExtValue(), DL,
+                                                    MVT::i32),
+                                    DAG.getConstant(static_cast<unsigned>(CCVal),
+                                                    DL, MVT::i32));
+      return DAG.getNode(YASarchISD::BR_CC, DL, Op.getValueType(),
+                         Op.getOperand(0), Compare, Block);
+    }
+  }
+
+  SDValue Block = Op.getOperand(4);
+  SDValue Compare = DAG.getNode(
+      YASarchISD::CMPRR, DL, MVT::i32, LHS, RHS,
+      DAG.getConstant(static_cast<unsigned>(CCVal), DL, MVT::i32));
+  return DAG.getNode(YASarchISD::BR_CC, DL, Op.getValueType(),
+                     Op.getOperand(0), Compare, Block);
 }
 
 SDValue YASarchTargetLowering::LowerOperation(SDValue Op,

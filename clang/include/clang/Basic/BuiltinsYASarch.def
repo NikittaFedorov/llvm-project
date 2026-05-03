@@ -1,4 +1,8 @@
 BUILTIN(YASarchPutPixel, "vUiUiUi", "nc")
 BUILTIN(YASarchFlush, "v", "nc")
+BUILTIN(YASarchDelay, "vUi", "nc")
+BUILTIN(YASarchRand, "Ui", "nc")
+BUILTIN(YASarchGetTicks, "Ui", "nc")
+BUILTIN(YASarchCheckFinish, "Ui", "nc")
 
 #undef BUILTIN

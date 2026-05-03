@@ -17,8 +17,14 @@ enum NodeType : unsigned {
   RET,
   CALL,
   BR_CC,
+  CMPRR,
+  CMPRI,
   INC_EQi,
   INC_NEi,
+  INC_LEi,
+  INC_LTi,
+  INC_GEi,
+  INC_GTi,
 };
 
 } // namespace YASarchISD
@@ -67,6 +73,7 @@ private:
   SDValue LowerOperation(SDValue Op, SelectionDAG &DAG) const override;
   SDValue lowerBR_CC(SDValue Op, SelectionDAG &DAG) const;
   unsigned getIsdOpIncCmp(ISD::CondCode CCVal) const;
+  ISD::CondCode normalizeCondCode(ISD::CondCode CCVal) const;
 };
 
 

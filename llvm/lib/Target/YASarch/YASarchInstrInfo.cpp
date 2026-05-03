@@ -15,6 +15,24 @@ using namespace llvm;
 
 #define DEBUG_TYPE "YASarch-inst-info"
 
+static const MachineInstrBuilder &addFrameReference(const MachineInstrBuilder &MIB,
+                                                    int FI) {
+  MachineInstr *MI = MIB;
+  MachineFunction &MF = *MI->getParent()->getParent();
+  MachineFrameInfo &MFI = MF.getFrameInfo();
+  const MCInstrDesc &MCID = MI->getDesc();
+  MachineMemOperand::Flags Flags = MachineMemOperand::MONone;
+  if (MCID.mayLoad())
+    Flags |= MachineMemOperand::MOLoad;
+  if (MCID.mayStore())
+    Flags |= MachineMemOperand::MOStore;
+
+  MachineMemOperand *MMO = MF.getMachineMemOperand(
+      MachinePointerInfo::getFixedStack(MF, FI), Flags, MFI.getObjectSize(FI),
+      MFI.getObjectAlign(FI));
+  return MIB.addFrameIndex(FI).addImm(0).addMemOperand(MMO);
+}
+
 YASarchInstrInfo::YASarchInstrInfo() : YASarchGenInstrInfo() { YASarch_DUMP_GREEN }
 
 void YASarchInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
@@ -30,4 +48,26 @@ void YASarchInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
     return;
   }
   llvm_unreachable("can't copyPhysReg");
+}
+
+void YASarchInstrInfo::storeRegToStackSlot(
+    MachineBasicBlock &MBB, MachineBasicBlock::iterator MBBI, Register SrcReg,
+    bool IsKill, int FrameIdx, const TargetRegisterClass *RC,
+    const TargetRegisterInfo *TRI, Register VReg,
+    MachineInstr::MIFlag Flags) const {
+  DebugLoc DL = MBBI != MBB.end() ? MBBI->getDebugLoc() : DebugLoc();
+  assert(RC == &YASarch::GPRRegClass && "Unsupported regclass to store");
+  addFrameReference(BuildMI(MBB, MBBI, DL, get(YASarch::ST))
+                        .addReg(SrcReg, getKillRegState(IsKill)),
+                    FrameIdx);
+}
+
+void YASarchInstrInfo::loadRegFromStackSlot(
+    MachineBasicBlock &MBB, MachineBasicBlock::iterator MBBI, Register DestReg,
+    int FrameIdx, const TargetRegisterClass *RC, const TargetRegisterInfo *TRI,
+    Register VReg, MachineInstr::MIFlag Flags) const {
+  DebugLoc DL = MBBI != MBB.end() ? MBBI->getDebugLoc() : DebugLoc();
+  assert(RC == &YASarch::GPRRegClass && "Unsupported regclass to load");
+  addFrameReference(BuildMI(MBB, MBBI, DL, get(YASarch::LD), DestReg),
+                    FrameIdx);
 }
