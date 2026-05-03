@@ -57,6 +57,9 @@ public:
   unsigned getSImm16OpValue(const MCInst &MI, unsigned OpNo,
                             SmallVectorImpl<MCFixup> &Fixups,
                             const MCSubtargetInfo &STI) const;
+  unsigned getBranchTarget16OpValue(const MCInst &MI, unsigned OpNo,
+                                    SmallVectorImpl<MCFixup> &Fixups,
+                                    const MCSubtargetInfo &STI) const;
 };
 
 } // end anonymous namespace
@@ -108,6 +111,19 @@ unsigned YASarchMCCodeEmitter::getSImm16OpValue(const MCInst &MI, unsigned OpNo,
   if (const MCConstantExpr *CE = dyn_cast<MCConstantExpr>(Expr))
     return CE->getValue();
 
+  return 0;
+}
+
+unsigned YASarchMCCodeEmitter::getBranchTarget16OpValue(
+    const MCInst &MI, unsigned OpNo, SmallVectorImpl<MCFixup> &Fixups,
+    const MCSubtargetInfo &STI) const {
+  const MCOperand &MO = MI.getOperand(OpNo);
+
+  if (MO.isImm())
+    return MO.getImm() / 4;
+
+  assert(MO.isExpr() &&
+         "getBranchTarget16OpValue expects only expressions or immediates");
   return 0;
 }
 
