@@ -1,3 +1,4 @@
+#include "MCTargetDesc/YASarchFixupKinds.h"
 #include "MCTargetDesc/YASarchMCTargetDesc.h"
 #include "YASarch.h"
 #include "llvm/ADT/SmallVector.h"
@@ -124,6 +125,8 @@ unsigned YASarchMCCodeEmitter::getBranchTarget16OpValue(
 
   assert(MO.isExpr() &&
          "getBranchTarget16OpValue expects only expressions or immediates");
+  Fixups.push_back(MCFixup::create(
+      0, MO.getExpr(), MCFixupKind(YASarch::fixup_YASarch_PC16)));
   return 0;
 }
 

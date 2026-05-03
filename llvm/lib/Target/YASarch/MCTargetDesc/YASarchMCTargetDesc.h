@@ -3,6 +3,9 @@
 #include <memory>
 
 namespace llvm {
+class Triple;
+class StringRef;
+class MCAsmInfo;
 class MCCodeEmitter;
 class MCContext;
 class MCInstrInfo;
@@ -13,6 +16,12 @@ class MCSubtargetInfo;
 class MCTargetOptions;
 class Target;
 
+MCRegisterInfo *createYASarchMCRegisterInfo(const Triple &TT);
+MCInstrInfo *createYASarchMCInstrInfo();
+MCSubtargetInfo *createYASarchMCSubtargetInfo(const Triple &TT, StringRef CPU,
+                                              StringRef FS);
+MCAsmInfo *createYASarchMCAsmInfo(const MCRegisterInfo &MRI, const Triple &TT,
+                                  const MCTargetOptions &Options);
 MCCodeEmitter *createYASarchMCCodeEmitter(const MCInstrInfo &MCII,
                                           MCContext &Ctx);
 MCAsmBackend *createYASarchAsmBackend(const Target &T,

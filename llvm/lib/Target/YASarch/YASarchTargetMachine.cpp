@@ -1,10 +1,12 @@
 #include "llvm/MC/TargetRegistry.h"
 #include "llvm/CodeGen/TargetPassConfig.h"
 #include "llvm/CodeGen/TargetLoweringObjectFileImpl.h"
+#include "llvm/MC/MCAsmInfo.h"
 
 #include <optional>
 
 #include "YASarchTargetMachine.h"
+#include "MCTargetDesc/YASarchMCTargetDesc.h"
 #include "TargetInfo/YASarchTargetInfo.h"
 
 #include "YASarch.h"
@@ -30,6 +32,31 @@ YASarchTargetMachine::YASarchTargetMachine(const Target &T, const Triple &TT,
       Subtarget(TT, std::string(CPU), std::string(FS), *this) {
   YASarch_DUMP_CYAN
   initAsmInfo();
+  if (!MRI)
+    MRI.reset(createYASarchMCRegisterInfo(TT));
+  if (!MII)
+    MII.reset(createYASarchMCInstrInfo());
+  if (!STI)
+    STI.reset(createYASarchMCSubtargetInfo(TT, CPU, FS));
+  if (!AsmInfo) {
+    MCAsmInfo *TmpAsmInfo = createYASarchMCAsmInfo(*MRI, TT, Options.MCOptions);
+
+    if (Options.BinutilsVersion.first > 0)
+      TmpAsmInfo->setBinutilsVersion(Options.BinutilsVersion);
+
+    if (Options.DisableIntegratedAS) {
+      TmpAsmInfo->setUseIntegratedAssembler(false);
+      TmpAsmInfo->setParseInlineAsmUsingAsmParser(false);
+    }
+
+    TmpAsmInfo->setPreserveAsmComments(Options.MCOptions.PreserveAsmComments);
+    TmpAsmInfo->setFullRegisterNames(Options.MCOptions.PPCUseFullRegisterNames);
+
+    if (Options.ExceptionModel != ExceptionHandling::None)
+      TmpAsmInfo->setExceptionsType(Options.ExceptionModel);
+
+    AsmInfo.reset(TmpAsmInfo);
+  }
 }
 
 namespace {

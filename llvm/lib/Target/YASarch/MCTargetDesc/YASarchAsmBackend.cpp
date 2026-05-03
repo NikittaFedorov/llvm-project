@@ -1,3 +1,4 @@
+#include "MCTargetDesc/YASarchFixupKinds.h"
 #include "MCTargetDesc/YASarchMCTargetDesc.h"
 #include "llvm/ADT/StringSwitch.h"
 #include "llvm/MC/MCAsmBackend.h"
@@ -21,7 +22,25 @@ public:
   YASarchAsmBackend(const Target &T)
       : MCAsmBackend(llvm::endianness::little), TheTarget(T) {}
 
-  unsigned getNumFixupKinds() const override { return 0; }
+  unsigned getNumFixupKinds() const override {
+    return YASarch::NumTargetFixupKinds;
+  }
+
+  const MCFixupKindInfo &getFixupKindInfo(MCFixupKind Kind) const override {
+    const static MCFixupKindInfo InfosLE[YASarch::NumTargetFixupKinds] = {
+        {"fixup_YASarch_PC16", 0, 16, MCFixupKindInfo::FKF_IsPCRel},
+    };
+
+    if (Kind >= FirstLiteralRelocationKind)
+      return MCAsmBackend::getFixupKindInfo(FK_NONE);
+
+    if (Kind < FirstTargetFixupKind)
+      return MCAsmBackend::getFixupKindInfo(Kind);
+
+    assert(unsigned(Kind - FirstTargetFixupKind) < getNumFixupKinds() &&
+           "Invalid kind!");
+    return InfosLE[Kind - FirstTargetFixupKind];
+  }
 
   bool writeNopData(raw_ostream &OS, uint64_t Count,
                     const MCSubtargetInfo *STI) const override {
@@ -48,6 +67,19 @@ public:
                   const MCValue &Target, MutableArrayRef<char> Data,
                   uint64_t Value, bool IsResolved,
                   const MCSubtargetInfo *STI) const override {
+    unsigned NumBytes = 0;
+    switch (Fixup.getKind()) {
+    default:
+      return;
+    case YASarch::fixup_YASarch_PC16:
+      Value /= 4;
+      NumBytes = 2;
+      break;
+    }
+
+    unsigned Offset = Fixup.getOffset();
+    for (unsigned i = 0; i != NumBytes; ++i)
+      Data[Offset + i] |= uint8_t((Value >> (i * 8)) & 0xff);
     return;
   }
 

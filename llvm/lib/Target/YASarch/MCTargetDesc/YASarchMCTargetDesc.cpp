@@ -24,7 +24,7 @@ using namespace llvm;
 #define GET_SUBTARGETINFO_MC_DESC
 #include "YASarchGenSubtargetInfo.inc"
 
-static MCRegisterInfo *createYASarchMCRegisterInfo(const Triple &TT) {
+MCRegisterInfo *llvm::createYASarchMCRegisterInfo(const Triple &TT) {
   YASarch_DUMP_MAGENTA
   MCRegisterInfo *X = new MCRegisterInfo();
   InitYASarchMCRegisterInfo(X, YASarch::R0);
@@ -33,22 +33,23 @@ static MCRegisterInfo *createYASarchMCRegisterInfo(const Triple &TT) {
   return X;
 }
 
-static MCInstrInfo *createYASarchMCInstrInfo() {
+MCInstrInfo *llvm::createYASarchMCInstrInfo() {
   YASarch_DUMP_MAGENTA
   MCInstrInfo *X = new MCInstrInfo();
   InitYASarchMCInstrInfo(X);
   return X;
 }
 
-static MCSubtargetInfo *createYASarchMCSubtargetInfo(const Triple &TT,
-                                                 StringRef CPU, StringRef FS) {
+MCSubtargetInfo *llvm::createYASarchMCSubtargetInfo(const Triple &TT,
+                                                    StringRef CPU,
+                                                    StringRef FS) {
   YASarch_DUMP_MAGENTA
   return createYASarchMCSubtargetInfoImpl(TT, CPU, /*TuneCPU*/ CPU, FS);
 }
 
-static MCAsmInfo *createYASarchMCAsmInfo(const MCRegisterInfo &MRI,
-                                     const Triple &TT,
-                                     const MCTargetOptions &Options) {
+MCAsmInfo *llvm::createYASarchMCAsmInfo(const MCRegisterInfo &MRI,
+                                        const Triple &TT,
+                                        const MCTargetOptions &Options) {
   YASarch_DUMP_MAGENTA
   MCAsmInfo *MAI = new YASarchELFMCAsmInfo(TT);
   unsigned SP = MRI.getDwarfRegNum(YASarch::R1, true);
