@@ -14,7 +14,10 @@ class YASarchSubtarget;
 class YASarchInstrInfo : public YASarchGenInstrInfo {
 public:
   YASarchInstrInfo();
-
+  void copyPhysReg(MachineBasicBlock &MBB, MachineBasicBlock::iterator MBBI,
+                   const DebugLoc &DL, MCRegister DestReg, MCRegister SrcReg,
+                   bool KillSrc, bool RenamableDest = false,
+                   bool RenamableSrc = false) const override;
 };
 
 } // end namespace llvm

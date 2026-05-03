@@ -16,3 +16,18 @@ using namespace llvm;
 #define DEBUG_TYPE "YASarch-inst-info"
 
 YASarchInstrInfo::YASarchInstrInfo() : YASarchGenInstrInfo() { YASarch_DUMP_GREEN }
+
+void YASarchInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
+                                   MachineBasicBlock::iterator MBBI,
+                                   const DebugLoc &DL, MCRegister DstReg,
+                                   MCRegister SrcReg, bool KillSrc,
+                                   bool RenamableDest,
+                                   bool RenamableSrc) const {
+  if (YASarch::GPRRegClass.contains(DstReg, SrcReg)) {
+    BuildMI(MBB, MBBI, DL, get(YASarch::ORI), DstReg)
+        .addReg(SrcReg, getKillRegState(KillSrc))
+        .addImm(0);
+    return;
+  }
+  llvm_unreachable("can't copyPhysReg");
+}
