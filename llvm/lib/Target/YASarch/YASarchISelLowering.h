@@ -17,6 +17,7 @@ enum NodeType : unsigned {
   RET,
   CALL,
   BR_CC,
+  INC_EQi,
 };
 
 } // namespace YASarchISD
@@ -62,6 +63,8 @@ private:
                       bool IsVarArg,
                       const SmallVectorImpl<ISD::OutputArg> &ArgsFlags,
                       LLVMContext &Context, const Type *RetTy) const override;
+  SDValue LowerOperation(SDValue Op, SelectionDAG &DAG) const override;
+  SDValue lowerBR_CC(SDValue Op, SelectionDAG &DAG) const;
 };
 
 
