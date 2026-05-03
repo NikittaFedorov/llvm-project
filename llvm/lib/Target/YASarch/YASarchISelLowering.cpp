@@ -74,6 +74,8 @@ const char *YASarchTargetLowering::getTargetNodeName(unsigned Opcode) const {
     return "YASarchISD::BR_CC";
   case YASarchISD::INC_EQi:
     return "YASarchISD::INC_EQi";
+  case YASarchISD::INC_NEi:
+    return "YASarchISD::INC_NEi";
   }
   return nullptr;
 }
@@ -612,24 +614,34 @@ bool YASarchTargetLowering::isLegalAddressingMode(const DataLayout &DL,
   return true;
 }
 
-SDValue YASarchTargetLowering::lowerBR_CC(SDValue Op,
-                                          SelectionDAG &DAG) const {
+unsigned YASarchTargetLowering::getIsdOpIncCmp(ISD::CondCode CCVal) const {
+  switch (CCVal) {
+  default:
+    llvm_unreachable("CCVal for INC not implemented");
+  case ISD::CondCode::SETEQ:
+    return YASarchISD::INC_EQi;
+  case ISD::CondCode::SETNE:
+    return YASarchISD::INC_NEi;
+  }
+}
+
+SDValue YASarchTargetLowering::lowerBR_CC(SDValue Op, SelectionDAG &DAG) const {
   SDValue CC = Op.getOperand(1);
   SDValue ADD = Op.getOperand(2);
   ISD::CondCode CCVal = cast<CondCodeSDNode>(CC)->get();
-  if (CCVal == ISD::CondCode::SETEQ && ADD->getOpcode() == ISD::ADD) {
+  if (ADD->getOpcode() == ISD::ADD) {
     SDValue INC = ADD->getOperand(1);
     if (INC->getOpcode() == ISD::Constant &&
         cast<ConstantSDNode>(INC)->getZExtValue() == 1) {
       SDValue CMP = Op.getOperand(3);
-      SDValue INCEQi = DAG.getNode(
-          YASarchISD::INC_EQi, ADD, DAG.getVTList({MVT::i32, MVT::i32}),
-          ADD->getOperand(0), CMP);
-      DAG.ReplaceAllUsesWith(ADD, INCEQi.getValue(1));
+      SDValue INCCMP = DAG.getNode(getIsdOpIncCmp(CCVal), ADD,
+                                   DAG.getVTList({MVT::i32, MVT::i32}),
+                                   ADD->getOperand(0), CMP);
+      DAG.ReplaceAllUsesWith(ADD, INCCMP.getValue(1));
       DAG.RemoveDeadNode(ADD.getNode());
       SDValue Block = Op->getOperand(4);
       return DAG.getNode(YASarchISD::BR_CC, Op, Op.getValueType(),
-                         Op.getOperand(0), INCEQi.getValue(0), Block);
+                         Op.getOperand(0), INCCMP.getValue(0), Block);
     }
   }
   return Op;

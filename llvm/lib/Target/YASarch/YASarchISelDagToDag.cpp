@@ -81,6 +81,8 @@ unsigned YASarchDAGToDAGISel::getOpIncCmp(unsigned Opcode) const {
     llvm_unreachable("CCVal for INC not implemented");
   case YASarchISD::INC_EQi:
     return YASarch::INC_EQi;
+  case YASarchISD::INC_NEi:
+    return YASarch::INC_NEi;
   }
 }
 
@@ -96,7 +98,8 @@ void YASarchDAGToDAGISel::Select(SDNode *Node) {
   switch (Opcode) {
   default:
     break;
-  case YASarchISD::INC_EQi: {
+  case YASarchISD::INC_EQi:
+  case YASarchISD::INC_NEi: {
     SDNode *INCCMP = CurDAG->getMachineNode(
         getOpIncCmp(Opcode), DL, {MVT::i32, MVT::i32},
         {Node->getOperand(0),
